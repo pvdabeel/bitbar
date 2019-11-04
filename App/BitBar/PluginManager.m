@@ -14,9 +14,12 @@
 #import "LaunchAtLoginController.h"
 #import <Sparkle/SUUpdater.h>
 
+NSString *const AppleInterfaceThemeChangedNotification = @"AppleInterfaceThemeChangedNotification";
+
 @interface PluginManager () {
   LaunchAtLoginController *_launchAtLoginController;
 }
+@property (nonatomic, readwrite) NSDictionary<NSString *, NSString *> *environment;
 @end
 
 @implementation PluginManager
@@ -25,8 +28,18 @@
   if (self = [super init]) {
     _path = [path stringByStandardizingPath];
     _launchAtLoginController = [[LaunchAtLoginController alloc] init];
+    [self updateEnvironment];
+    [self setupObserver];
   }
   return self;
+}
+
+- (void)dealloc {
+  [NSDistributedNotificationCenter.defaultCenter removeObserver:self name:AppleInterfaceThemeChangedNotification object:nil];
+}
+
+- (void)setupObserver {
+  [NSDistributedNotificationCenter.defaultCenter addObserver:self selector:@selector(updateEnvironment) name:AppleInterfaceThemeChangedNotification object:nil];
 }
 
 - (void) showSystemStatusItemWithMessage:(NSString*)message {
@@ -279,23 +292,15 @@
   });
 }
 
-- (NSDictionary *)environment {
-  
-  return _environment = _environment ?: ({
-
-    NSMutableDictionary *env = NSProcessInfo.processInfo.environment.mutableCopy;
-    env[@"BitBar"] = @YES;
-    env[@"BitBarVersion"] = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey];
-      
+- (void)updateEnvironment {
+    NSMutableDictionary<NSString *, NSString *> *env = NSProcessInfo.processInfo.environment.mutableCopy;
+    env[@"BitBar"] = [@YES stringValue];
     // Determine if Mac is in Dark Mode
     NSString *osxMode = [[NSUserDefaults standardUserDefaults] stringForKey:@"AppleInterfaceStyle"];
     if ([osxMode isEqualToString:@"Dark"]) {
-        env[@"BitBarDarkMode"] = @YES;
+      env[@"BitBarDarkMode"] = [@YES stringValue];
     }
-      
-    env;
-  });
-  
+    self.environment = env;
 }
 
 - (void) pluginDidUdpdateItself:(Plugin*)plugin {

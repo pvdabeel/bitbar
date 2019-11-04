@@ -92,7 +92,7 @@
 
 - (void) receiveWakeNote: (NSNotification*) note
 {
-  [[self pluginManager] reset];
+  [self.pluginManager setupAllPlugins];
 }
 
 - (void)handleGetURLEvent:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)replyEvent {
@@ -140,7 +140,7 @@
   
   // don't open plugins if user configuration is disabled
   if (DEFS.userConfigDisabled)
-    return;
+      return;
   
   prefix = @"bitbar://openPlugin?";
   

@@ -285,8 +285,8 @@
       [params setObject:args forKey:@"args"];
       [self performSelectorInBackground:@selector(startTask:) withObject:params];
     } else {
-
-      NSString *full_link = [NSString stringWithFormat:@"%@ %@ %@ %@ %@ %@", bash, param1, param2, param3, param4, param5];
+      NSLog(@"Attempting to run in Terminal with args: %@", args);
+      NSString *full_link = [NSString stringWithFormat:@"'%@' %@ %@ %@ %@ %@", bash, param1, param2, param3, param4, param5];
       NSString *s = [NSString stringWithFormat:@"tell application \"Terminal\" \n\
                  do script \"%@\" \n\
                  activate \n\
